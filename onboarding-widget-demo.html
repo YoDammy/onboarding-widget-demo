@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client onboarding assistant — live demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F6F2;
+    --paper-raised:#FFFFFF;
+    --ink:#161A17;
+    --ink-soft:#565F59;
+    --ink-faint:#8B9289;
+    --line:#DEE1DA;
+    --teal:#1F6F5C;
+    --teal-dark:#164F42;
+    --teal-tint:#E4EFEC;
+    --sand:#B4923A;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .site-nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:28px 56px;
+    border-bottom:1px solid var(--line);
+  }
+  .site-nav .mark{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:20px;
+    letter-spacing:-0.01em;
+  }
+  .site-nav .mark span{color:var(--teal);}
+  .site-nav .links{display:flex; gap:32px; font-size:14px; color:var(--ink-soft);}
+  .hero{
+    max-width:720px;
+    margin:0 auto;
+    padding:120px 32px 160px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--teal-dark);
+    background:var(--teal-tint);
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:100px;
+    margin-bottom:28px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:52px;
+    line-height:1.12;
+    letter-spacing:-0.015em;
+    margin:0 0 24px;
+  }
+  .hero p{
+    font-size:17px;
+    line-height:1.65;
+    color:var(--ink-soft);
+    margin:0 auto 40px;
+    max-width:520px;
+  }
+  .hero-btn{
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    font-size:14px;
+    font-weight:500;
+    padding:14px 28px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .hint{
+    max-width:720px;
+    margin:0 auto 100px;
+    padding:0 32px;
+    text-align:center;
+    color:var(--ink-faint);
+    font-size:13px;
+  }
+  .hint strong{color:var(--ink-soft); font-weight:500;}
+
+  #chat-fab{
+    position:fixed;
+    bottom:28px;
+    right:28px;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 24px rgba(22,26,23,0.28);
+    z-index:1000;
+    transition:transform 0.15s ease;
+  }
+  #chat-fab:hover{transform:scale(1.05);}
+  #chat-fab svg{width:24px; height:24px;}
+
+  #chat-panel{
+    position:fixed;
+    bottom:98px;
+    right:28px;
+    width:368px;
+    max-width:calc(100vw - 40px);
+    height:540px;
+    max-height:calc(100vh - 140px);
+    background:var(--paper-raised);
+    border-radius:16px;
+    border:1px solid var(--line);
+    box-shadow:0 20px 60px rgba(22,26,23,0.18);
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:1000;
+  }
+  #chat-panel.open{display:flex;}
+
+  .chat-header{
+    background:var(--ink);
+    color:#fff;
+    padding:16px 18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .chat-header .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:#4ADE80;
+  }
+  .chat-header .title{font-size:14px; font-weight:500;}
+  .chat-header .sub{font-size:12px; color:rgba(255,255,255,0.6); margin-left:auto;}
+  .chat-header .close-btn{
+    background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; padding:4px; margin-left:8px;
+  }
+
+  .chat-body{
+    flex:1;
+    overflow-y:auto;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .msg{
+    max-width:84%;
+    font-size:13.5px;
+    line-height:1.55;
+    padding:10px 13px;
+    border-radius:12px;
+  }
+  .msg.bot{
+    background:var(--teal-tint);
+    color:var(--teal-dark);
+    align-self:flex-start;
+    border-bottom-left-radius:3px;
+  }
+  .msg.user{
+    background:var(--ink);
+    color:#fff;
+    align-self:flex-end;
+    border-bottom-right-radius:3px;
+  }
+  .msg.typing{
+    background:var(--teal-tint);
+    color:var(--teal-dark);
+    align-self:flex-start;
+    border-bottom-left-radius:3px;
+    display:flex;
+    gap:4px;
+    padding:13px;
+  }
+  .msg.typing span{
+    width:5px; height:5px; border-radius:50%; background:var(--teal-dark);
+    opacity:0.5;
+    animation:blink 1.2s infinite;
+  }
+  .msg.typing span:nth-child(2){animation-delay:0.2s;}
+  .msg.typing span:nth-child(3){animation-delay:0.4s;}
+  @keyframes blink{0%,80%,100%{opacity:0.3;} 40%{opacity:1;}}
+
+  .summary-card{
+    align-self:stretch;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:12.5px;
+  }
+  .summary-card .head{
+    display:flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:600; color:var(--teal-dark);
+    margin-bottom:10px;
+  }
+  .summary-card .row{
+    display:flex; justify-content:space-between; gap:12px;
+    padding:6px 0;
+    border-top:1px solid var(--line);
+  }
+  .summary-card .row:first-of-type{border-top:none;}
+  .summary-card .row .k{color:var(--ink-faint); flex-shrink:0;}
+  .summary-card .row .v{color:var(--ink); text-align:right;}
+  .summary-card .footer-note{
+    margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
+    color:var(--ink-faint); font-size:11px; display:flex; align-items:center; gap:6px;
+  }
+
+  .chat-input-row{
+    border-top:1px solid var(--line);
+    padding:12px;
+    display:flex;
+    gap:8px;
+  }
+  .chat-input-row input{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+  }
+  .chat-input-row input:focus{border-color:var(--teal);}
+  .chat-input-row button{
+    background:var(--teal);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    width:38px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .chat-input-row button:disabled{opacity:0.5; cursor:default;}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="mark">Harbor<span>&</span>Co.</div>
+  <div class="links">
+    <span>Services</span><span>Work</span><span>About</span><span>Contact</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow">New client intake</div>
+  <h1>Tell us what you need.<br>We'll take it from there.</h1>
+  <p>This is a placeholder homepage standing in for a real client site — the only thing that matters here is the widget in the corner.</p>
+  <button class="hero-btn" onclick="document.getElementById('chat-fab').click()">Start a project</button>
+</section>
+
+<p class="hint"><strong>This is a live, working demo</strong> — the bubble bottom-right is a real AI intake assistant. Try it: describe a project, and it'll ask what it needs, then hand a clean summary to the "CRM" panel at the end.</p>
+
+<button id="chat-fab" onclick="toggleChat()" aria-label="Open chat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+</button>
+
+<div id="chat-panel">
+  <div class="chat-header">
+    <div class="dot"></div>
+    <div class="title">Harbor & Co. — Intake</div>
+    <div class="sub">Usually replies instantly</div>
+    <button class="close-btn" onclick="toggleChat()" aria-label="Close chat">✕</button>
+  </div>
+  <div class="chat-body" id="chat-body"></div>
+  <div class="chat-input-row">
+    <input id="chat-input" type="text" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()">
+    <button id="chat-send" onclick="sendMessage()" aria-label="Send">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+let chatOpen = false;
+let history = [];
+let hasGreeted = false;
+
+const SYSTEM_PROMPT = `You are the onboarding assistant embedded on Harbor & Co.'s website, a small consulting agency. A prospective new client is starting a conversation. Your job: warmly and conversationally collect these details, one or two questions at a time (never a long list at once):
+1. what the client needs help with
+2. their goals and current situation
+3. budget and expected timeline
+4. tools or platforms they already use
+5. any documents or links they want to share
+
+Keep messages short (2-4 sentences max), human, and friendly — never robotic or like a form. Ask naturally, react to what they say, and don't repeat questions they've already answered.
+
+Once you have enough detail across most of these areas (it's fine if documents/links is skipped), respond with a short warm closing line thanking them, then on a new line output exactly:
+SUMMARY_JSON:{"need":"...","goals":"...","budget":"...","timeline":"...","tools":"...","notes":"..."}
+Fill each field concisely from what they told you, or "not specified" if truly not covered. Only output SUMMARY_JSON once, at the very end, after a natural closing message.`;
+
+function toggleChat(){
+  chatOpen = !chatOpen;
+  document.getElementById('chat-panel').classList.toggle('open', chatOpen);
+  if(chatOpen && !hasGreeted){
+    hasGreeted = true;
+    addMessage('bot', "Hi! I help get new projects started here. What are you looking to build or fix?");
+    history.push({role:'assistant', content:"Hi! I help get new projects started here. What are you looking to build or fix?"});
+  }
+}
+
+function addMessage(role, text){
+  const body = document.getElementById('chat-body');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function addSummaryCard(data){
+  const body = document.getElementById('chat-body');
+  const card = document.createElement('div');
+  card.className = 'summary-card';
+  const rows = [
+    ['Need', data.need],
+    ['Goals', data.goals],
+    ['Budget', data.budget],
+    ['Timeline', data.timeline],
+    ['Tools', data.tools],
+    ['Notes', data.notes]
+  ];
+  card.innerHTML = `<div class="head"><span>&#10003;</span> Synced to CRM</div>` +
+    rows.map(([k,v]) => `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('') +
+    `<div class="footer-note"><span>&#8594;</span> Team notified — no manual entry needed</div>`;
+  body.appendChild(card);
+  body.scrollTop = body.scrollHeight;
+}
+
+function showTyping(){
+  const body = document.getElementById('chat-body');
+  const div = document.createElement('div');
+  div.className = 'msg typing';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+function hideTyping(){
+  const t = document.getElementById('typing-indicator');
+  if(t) t.remove();
+}
+
+async function sendMessage(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  document.getElementById('chat-send').disabled = true;
+
+  addMessage('user', text);
+  history.push({role:'user', content:text});
+  showTyping();
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+    const data = await response.json();
+    hideTyping();
+
+    const fullText = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+
+    if(fullText.includes('SUMMARY_JSON:')){
+      const [closing, jsonPart] = fullText.split('SUMMARY_JSON:');
+      const cleanClosing = closing.trim();
+      if(cleanClosing) addMessage('bot', cleanClosing);
+      try{
+        const parsed = JSON.parse(jsonPart.trim());
+        addSummaryCard(parsed);
+      }catch(e){
+        addMessage('bot', "Thanks — I've got what I need to pass to the team.");
+      }
+      history.push({role:'assistant', content:fullText});
+    } else {
+      addMessage('bot', fullText);
+      history.push({role:'assistant', content:fullText});
+    }
+  }catch(err){
+    hideTyping();
+    addMessage('bot', "Sorry, I'm having trouble connecting right now — mind trying again in a moment?");
+  }
+
+  document.getElementById('chat-send').disabled = false;
+}
+</script>
+
+</body>
+</html>
