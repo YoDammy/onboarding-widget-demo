@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bright Dental — patient intake demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFCFD;
+    --panel:#EEF5F7;
+    --paper-raised:#FFFFFF;
+    --ink:#132027;
+    --ink-soft:#5A6A72;
+    --ink-faint:#94A2A9;
+    --line:#E4EBEE;
+    --teal:#0E8C8C;
+    --teal-dark:#0A6767;
+    --teal-tint:#DBEFEF;
+    --coral:#FF6B5E;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;}
+
+  /* pill nav floating on a white bar */
+  .site-nav{display:flex; justify-content:space-between; align-items:center; padding:20px 40px; max-width:1180px; margin:0 auto;}
+  .site-nav .mark{font-weight:600; font-size:21px; letter-spacing:-0.02em; color:var(--ink);}
+  .site-nav .mark span{color:var(--teal);}
+  .site-nav .navwrap{display:flex; align-items:center; gap:8px;}
+  .site-nav .links{display:flex; gap:4px; background:#fff; border:1px solid var(--line); border-radius:100px; padding:5px; }
+  .site-nav .links span{font-size:13.5px; color:var(--ink-soft); padding:8px 15px; border-radius:100px; cursor:pointer;}
+  .site-nav .links span.active{background:var(--teal-tint); color:var(--teal-dark); font-weight:500;}
+  .nav-cta{background:var(--ink); color:#fff; font-size:13.5px; font-weight:500; padding:11px 20px; border-radius:100px; border:none; cursor:pointer;}
+
+  /* split hero: text left, trust panel right */
+  .hero{max-width:1180px; margin:0 auto; padding:70px 40px 120px; display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;}
+  .hero-left .status{display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--teal-dark); background:var(--teal-tint); padding:7px 14px; border-radius:100px; margin-bottom:26px;}
+  .hero-left .status .live{width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(14,140,140,0.18);}
+  h1{font-weight:600; font-size:52px; line-height:1.08; letter-spacing:-0.03em; margin:0 0 20px;}
+  h1 em{font-style:normal; color:var(--teal);}
+  .hero-left p{font-size:17px; line-height:1.6; color:var(--ink-soft); margin:0 0 34px; max-width:440px;}
+  .hero-actions{display:flex; gap:12px; align-items:center;}
+  .hero-btn{background:var(--coral); color:#fff; border:none; font-size:15px; font-weight:600; padding:15px 30px; border-radius:100px; cursor:pointer; box-shadow:0 6px 18px rgba(255,107,94,0.32);}
+  .hero-btn-ghost{background:none; border:none; color:var(--ink-soft); font-size:14px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
+
+  /* right-side trust/info panel */
+  .hero-panel{background:var(--panel); border-radius:24px; padding:32px; position:relative; overflow:hidden;}
+  .hero-panel .panel-title{font-size:13px; text-transform:uppercase; letter-spacing:0.07em; color:var(--teal-dark); font-weight:600; margin-bottom:20px;}
+  .stat-row{display:flex; gap:16px; margin-bottom:24px;}
+  .stat{flex:1; background:#fff; border-radius:16px; padding:16px 18px;}
+  .stat .num{font-size:28px; font-weight:600; letter-spacing:-0.02em; color:var(--ink);}
+  .stat .lbl{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .feature-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+  .feature-list li{display:flex; align-items:center; gap:11px; font-size:14px; color:var(--ink); background:#fff; padding:13px 15px; border-radius:12px;}
+  .feature-list li .tick{width:20px; height:20px; flex-shrink:0; border-radius:50%; background:var(--teal-tint); color:var(--teal-dark); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;}
+
+  .hint{max-width:1180px; margin:0 auto 90px; padding:0 40px; color:var(--ink-faint); font-size:13px;}
+  .hint strong{color:var(--ink-soft); font-weight:500;}
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr; gap:36px; padding:40px 28px 90px;}
+    h1{font-size:40px;}
+    .site-nav .links{display:none;}
+  }
+
+  #chat-fab{position:fixed; bottom:28px; right:28px; width:58px; height:58px; border-radius:50%; background:var(--ink); color:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(20,26,22,0.28); z-index:1000; transition:transform 0.15s ease;}
+  #chat-fab:hover{transform:scale(1.05);}
+  #chat-fab svg{width:24px; height:24px;}
+
+  #chat-panel{position:fixed; bottom:98px; right:28px; width:372px; max-width:calc(100vw - 40px); height:560px; max-height:calc(100vh - 140px); background:var(--paper-raised); border-radius:16px; border:1px solid var(--line); box-shadow:0 20px 60px rgba(20,26,22,0.18); display:none; flex-direction:column; overflow:hidden; z-index:1000;}
+  #chat-panel.open{display:flex;}
+
+  .chat-header{background:var(--ink); color:#fff; padding:16px 18px; display:flex; align-items:center; gap:10px;}
+  .chat-header .dot{width:8px; height:8px; border-radius:50%; background:#4ADE80;}
+  .chat-header .title{font-size:14px; font-weight:500;}
+  .chat-header .sub{font-size:12px; color:rgba(255,255,255,0.6); margin-left:auto;}
+  .chat-header .close-btn{background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; padding:4px; margin-left:8px; font-size:14px;}
+
+  .chat-body{flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:14px;}
+  .msg{max-width:84%; font-size:13.5px; line-height:1.55; padding:10px 13px; border-radius:12px;}
+  .msg.bot{background:var(--teal-tint); color:var(--teal-dark); align-self:flex-start; border-bottom-left-radius:3px;}
+  .msg.user{background:var(--ink); color:#fff; align-self:flex-end; border-bottom-right-radius:3px;}
+  .msg.typing{background:var(--teal-tint); align-self:flex-start; border-bottom-left-radius:3px; display:flex; gap:4px; padding:13px;}
+  .msg.typing span{width:5px; height:5px; border-radius:50%; background:var(--teal-dark); opacity:0.5; animation:blink 1.2s infinite;}
+  .msg.typing span:nth-child(2){animation-delay:0.2s;}
+  .msg.typing span:nth-child(3){animation-delay:0.4s;}
+  @keyframes blink{0%,80%,100%{opacity:0.3;} 40%{opacity:1;}}
+
+  .quick-replies{display:flex; flex-wrap:wrap; gap:6px; align-self:flex-start; max-width:92%;}
+  .quick-replies button{background:#fff; border:1px solid var(--teal); color:var(--teal-dark); font-size:12.5px; font-family:'Inter',sans-serif; padding:7px 12px; border-radius:100px; cursor:pointer; transition:background 0.12s;}
+  .quick-replies button:hover{background:var(--teal-tint);}
+
+  .summary-card{align-self:stretch; background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; font-size:12.5px;}
+  .summary-card .head{display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--teal-dark); margin-bottom:10px;}
+  .summary-card .head .check{width:18px; height:18px; border-radius:50%; background:var(--teal); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px;}
+  .summary-card .row{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-top:1px solid var(--line);}
+  .summary-card .row:first-of-type{border-top:none;}
+  .summary-card .row .k{color:var(--ink-faint); flex-shrink:0;}
+  .summary-card .row .v{color:var(--ink); text-align:right; font-weight:500;}
+  .summary-card .footer-note{margin-top:10px; padding-top:10px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:11px; display:flex; align-items:center; gap:6px;}
+
+  .chat-input-row{border-top:1px solid var(--line); padding:12px; display:flex; gap:8px;}
+  .chat-input-row input{flex:1; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:13px; font-family:'Inter',sans-serif; outline:none;}
+  .chat-input-row input:focus{border-color:var(--teal);}
+  .chat-input-row button{background:var(--teal); color:#fff; border:none; border-radius:8px; width:38px; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .chat-input-row button:disabled{opacity:0.5; cursor:default;}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="mark">Bright<span>Dental</span></div>
+  <div class="navwrap">
+    <div class="links">
+      <span class="active">Home</span><span>Treatments</span><span>Our team</span><span>Fees</span>
+    </div>
+    <button class="nav-cta" onclick="openChat()">Book online</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="status"><span class="live"></span> Now taking online bookings</div>
+    <h1>Your next dental visit, booked in <em>under a minute</em>.</h1>
+    <p>No hold music, no callback tag. Tap a few options and our team confirms — this placeholder site stands in for a real practice, but the booking widget is fully working.</p>
+    <div class="hero-actions">
+      <button class="hero-btn" onclick="openChat()">Book an appointment</button>
+      <button class="hero-btn-ghost" onclick="openChat()">or ask a question</button>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <div class="panel-title">Why patients book online</div>
+    <div class="stat-row">
+      <div class="stat"><div class="num">45s</div><div class="lbl">Average booking</div></div>
+      <div class="stat"><div class="num">24/7</div><div class="lbl">Always open</div></div>
+    </div>
+    <ul class="feature-list">
+      <li><span class="tick">&#10003;</span> Check-ups, whitening & emergencies</li>
+      <li><span class="tick">&#10003;</span> New & returning patients welcome</li>
+      <li><span class="tick">&#10003;</span> Details go straight to reception</li>
+    </ul>
+  </div>
+</section>
+
+<p class="hint"><strong>Live demo</strong> — tap the bubble bottom-right (or any "Book" button). The assistant books a patient in with a few taps, then hands reception a ready-to-read brief.</p>
+
+<button id="chat-fab" onclick="openChat()" aria-label="Open chat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+</button>
+
+<div id="chat-panel">
+  <div class="chat-header">
+    <div class="dot"></div>
+    <div class="title">Bright Dental — Intake</div>
+    <div class="sub">Replies instantly</div>
+    <button class="close-btn" onclick="closeChat()" aria-label="Close chat">&#10005;</button>
+  </div>
+  <div class="chat-body" id="chat-body"></div>
+  <div class="chat-input-row">
+    <input id="chat-input" type="text" placeholder="Type a message…" onkeydown="if(event.key==='Enter')handleUserInput()">
+    <button id="chat-send" onclick="handleUserInput()" aria-label="Send">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const collected = {treatment:'', date:'', newPatient:'', timePref:'', name:'', contact:''};
+let step = 0;
+let started = false;
+
+const flow = [
+  {
+    key: 'treatment',
+    ask: "Hi! I can get you booked in at Bright Dental. What would you like to book in for?",
+    quick: ["Check-up", "Whitening", "Emergency", "New patient"]
+  },
+  {
+    key: 'date',
+    ask: "Great choice. When would suit you best?",
+    quick: ["This week", "Next week", "This month", "Flexible"]
+  },
+  {
+    key: 'newPatient',
+    ask: "Have you visited us before, or would this be your first time?",
+    quick: ["First visit", "Returning patient"]
+  },
+  {
+    key: 'timePref',
+    ask: "Do you prefer a morning or afternoon slot?",
+    quick: ["Morning", "Afternoon", "No preference"]
+  },
+  {
+    key: 'nameContact',
+    ask: "Last thing — what's your name and best email?",
+    quick: null,
+    freeText: true
+  }
+];
+
+function openChat(){
+  document.getElementById('chat-panel').classList.add('open');
+  if(!started){ started = true; setTimeout(() => askStep(0), 400); }
+}
+function closeChat(){ document.getElementById('chat-panel').classList.remove('open'); }
+
+function addMessage(role, text){
+  const body = document.getElementById('chat-body');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function addQuickReplies(options){
+  const body = document.getElementById('chat-body');
+  const wrap = document.createElement('div');
+  wrap.className = 'quick-replies';
+  wrap.id = 'quick-replies';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.onclick = () => { removeQuickReplies(); submitAnswer(opt); };
+    wrap.appendChild(btn);
+  });
+  body.appendChild(wrap);
+  body.scrollTop = body.scrollHeight;
+}
+function removeQuickReplies(){
+  const q = document.getElementById('quick-replies');
+  if(q) q.remove();
+}
+
+function showTyping(cb, delay){
+  const body = document.getElementById('chat-body');
+  const div = document.createElement('div');
+  div.className = 'msg typing';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+  setTimeout(() => {
+    const t = document.getElementById('typing-indicator');
+    if(t) t.remove();
+    cb();
+  }, delay || 900);
+}
+
+function askStep(i){
+  const s = flow[i];
+  showTyping(() => {
+    addMessage('bot', s.ask);
+    if(s.quick) addQuickReplies(s.quick);
+    if(s.freeText){
+      document.getElementById('chat-input').placeholder = "e.g. Sarah Mitchell, sarah@email.com";
+      document.getElementById('chat-input').focus();
+    }
+  }, i === 0 ? 500 : 900);
+}
+
+function handleUserInput(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  removeQuickReplies();
+  submitAnswer(text);
+}
+
+function submitAnswer(text){
+  if(step >= flow.length) return;
+  addMessage('user', text);
+  const key = flow[step].key;
+  if(key === 'nameContact'){
+    parseNameContact(text);
+  } else {
+    collected[key] = text;
+  }
+  step++;
+  if(step < flow.length){
+    askStep(step);
+  } else {
+    finish();
+  }
+}
+
+function parseNameContact(text){
+  const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+  if(emailMatch){
+    collected.contact = emailMatch[0];
+    collected.name = text.replace(emailMatch[0], '').replace(/[,·|-]+/g,' ').trim() || "Patient";
+  } else {
+    collected.name = text;
+    collected.contact = "not provided";
+  }
+}
+
+function finish(){
+  showTyping(() => {
+    addMessage('bot', "Perfect — you're all set. Our reception team has your details and will confirm your appointment shortly. See you soon!");
+    setTimeout(showSummary, 600);
+  }, 1000);
+}
+
+function showSummary(){
+  const body = document.getElementById('chat-body');
+  const card = document.createElement('div');
+  card.className = 'summary-card';
+  const newPatientVal = collected.newPatient === 'First visit' ? 'Yes' : (collected.newPatient === 'Returning patient' ? 'No' : collected.newPatient);
+  const rows = [
+    ['Treatment', collected.treatment],
+    ['Date', collected.date],
+    ['New patient', newPatientVal],
+    ['Time pref.', collected.timePref],
+    ['Name', collected.name],
+    ['Contact', collected.contact]
+  ];
+  card.innerHTML = '<div class="head"><span class="check">&#10003;</span> Synced to CRM</div>' +
+    rows.map(r => `<div class="row"><span class="k">${r[0]}</span><span class="v">${r[1]}</span></div>`).join('') +
+    '<div class="footer-note"><span>&#8594;</span> Reception notified — no manual entry</div>';
+  body.appendChild(card);
+  body.scrollTop = body.scrollHeight;
+  document.getElementById('chat-input').placeholder = "Demo complete — refresh to restart";
+  document.getElementById('chat-input').disabled = true;
+  document.getElementById('chat-send').disabled = true;
+}
+</script>
+
+</body>
+</html>
